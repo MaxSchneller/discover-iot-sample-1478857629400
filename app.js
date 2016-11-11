@@ -12,6 +12,16 @@ var appEnv = cfenv.getAppEnv();
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
 var config = null;
+var cred =  {
+                "iotCredentialsIdentifier": "a2g6k39sl6r5",
+                "mqtt_host": "pw1hut.messaging.internetofthings.ibmcloud.com",
+                "mqtt_u_port": 1883,
+                "mqtt_s_port": 8883,
+                "http_host": "pw1hut.internetofthings.ibmcloud.com",
+                "org": "pw1hut",
+                "apiKey": "a-pw1hut-6byzh8xrsr",
+                "apiToken": "ca_y9w!_01ue+n&UuU"
+			};
 var credentials = null;
 if (process.env.VCAP_SERVICES) {
 	config = JSON.parse(process.env.VCAP_SERVICES);
@@ -23,7 +33,7 @@ if (process.env.VCAP_SERVICES) {
 		}
 	}
 } else {
-	console.log("ERROR: IoT Service was not bound!");
+	credentials = cred;
 }
 
 var basicConfig = {
@@ -42,6 +52,20 @@ var options = {
 };
 
 app.get('/credentials', function(req, res) {
+	var appClient = new Client.IotfApplication(appClientConfig);
+
+    appClient.connect();
+
+    appClient.on("connect", function () {
+
+        appClient.subscribeToDeviceEvents("iot-phone","Dax","+","json");
+
+    });
+    appClient.on("deviceEvent", function (deviceType, deviceId, eventType, format, payload) {
+
+        console.log("Device Event from :: "+deviceType+" : "+deviceId+" of event "+eventType+" with payload : "+payload);
+
+    });
 	res.json(basicConfig);
 });
 
